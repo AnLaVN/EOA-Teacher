@@ -43,7 +43,7 @@ public class formExam extends javax.swing.JDialog {
         //set infor for combobox
         for(Lop lop : arrLop) cboClass.addItem(lop.getName());
         for(DeThi dethi : arrDeThi) cboTopic.addItem(dethi.getName());
-        cboTime.setModel(new javax.swing.DefaultComboBoxModel(new Object[]{15,45,60,90,120,180}));
+        cboTime.setModel(new javax.swing.DefaultComboBoxModel(new Object[]{0,1,15,45,60,90,120,180}));
         dateChooser.setTextRefernceLabel(lblChooseDay);
     }
     @SuppressWarnings("unchecked")
@@ -356,9 +356,9 @@ public class formExam extends javax.swing.JDialog {
 
     private void cboTimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboTimeActionPerformed
         cboDelay.removeAllItems();
-        for(int i = 0 ; i <= Integer.parseInt(cboTime.getSelectedItem().toString())*0.2; i++){
-            cboDelay.addItem(i);
-        }
+        Double max = Double.valueOf(cboTime.getSelectedItem().toString())*0.2;
+        max = max < 1 ? 1 : max;
+        for(int i = 1 ; i <= max; i++) cboDelay.addItem(i);
         onChange = false;
         setSaveIcon();
     }//GEN-LAST:event_cboTimeActionPerformed

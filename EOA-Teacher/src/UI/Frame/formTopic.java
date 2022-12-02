@@ -15,13 +15,8 @@ import static com.AnLa.UI.Mode.WMessage;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
 import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
@@ -1519,7 +1514,7 @@ public class formTopic extends javax.swing.JDialog {
     private CauHoi readDetail(){
         //khai bao va lay du lieu
         String Sen = txtSentence.getText();
-        String ansA = txtA.getText(), ansB = txtB.getText(), ansC = txtC.getText(), ansD = txtD.getText(), answer = "", ans = Lang.getString("EAns");
+        String ansA = txtA.getText().trim(), ansB = txtB.getText().trim(), ansC = txtC.getText().trim(), ansD = txtD.getText().trim(), answer = "", ans = Lang.getString("EAns");
         if(chkA.isSelected()) answer += "A";
         if(chkB.isSelected()) answer += "B";
         if(chkC.isSelected()) answer += "C";
