@@ -888,6 +888,18 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         timeThread.start();
+        BigLoader loader = new BigLoader(ParentFrame, true);
+        loader.setInfor("/UI/Image/Circle.gif", Lang.getString("Loading"));
+        loader.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                new Thread() { @Override public void run() {
+                    arrLop = LDAO.selectAllByGV(CurrentID);
+                    arrDeThi = DTDAO.selectAllByGV(CurrentID);
+                    arrBuoiThi = BTDAO.selectAllByGV(CurrentID);
+                    loader.dispose();
+                }}.start();
+            }});
+        loader.setVisible(true);
     }//GEN-LAST:event_formWindowOpened
 
     private void icoAccountMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_icoAccountMouseEntered
@@ -1022,7 +1034,6 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     private void fillPanClass() {
-        arrLop = LDAO.selectAllByGV(CurrentID);
         temp.removeAll();
         scrPan.setViewportView(temp);
         temp.setLayout(new java.awt.GridLayout(-1, temp.getSize().width/240));
@@ -1054,7 +1065,6 @@ public class Dashboard extends javax.swing.JFrame {
         temp.add(panplus);
     }
     private void fillPanTopic(){
-        arrDeThi = DTDAO.selectAllByGV(CurrentID);
         temp.removeAll();
         scrPan.setViewportView(temp);
         temp.setLayout(new java.awt.GridLayout(-1, temp.getSize().width/240));
@@ -1087,9 +1097,6 @@ public class Dashboard extends javax.swing.JFrame {
     }
     private SimpleDateFormat Formater = new SimpleDateFormat("dd/MM/yyyy");
     private void fillPanExam() {
-        arrLop = LDAO.selectAllByGV(CurrentID);
-        arrDeThi = DTDAO.selectAllByGV(CurrentID);
-        arrBuoiThi = BTDAO.selectAllByGV(CurrentID);
         temp.removeAll();
         scrPan.setViewportView(temp);
         temp.setLayout(new java.awt.GridLayout(-1, temp.getSize().width/240));
@@ -1125,7 +1132,6 @@ public class Dashboard extends javax.swing.JFrame {
         temp.add(panplus);
     }
     private void fillPanAnalytics() {
-        arrBuoiThi = BTDAO.selectAllByGV(CurrentID);
         temp.removeAll();
         scrPan.setViewportView(temp);
         temp.setLayout(new java.awt.GridLayout(-1, temp.getSize().width/240));

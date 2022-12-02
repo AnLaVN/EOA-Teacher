@@ -376,12 +376,13 @@ public class formClass extends javax.swing.JDialog {
         else if(arrSV.isEmpty()){//lop.getSoLuongSV() == 0
             if(WConfirm(parent, Lang.getString("EmptyClass").replaceFirst("\\.", ".\n"), Lang.getString("Notifi"), YES_NO_OPTION) == OK_OPTION){
                 BigLoader loader = new BigLoader(ParentFrame, true);
-                loader.setInfor("/UI/Image/Server.gif", Lang.getString("ReSV"));
+                loader.setInfor("/UI/Image/Bin.gif", Lang.getString("Deleting"));
                 loader.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override public void windowOpened(java.awt.event.WindowEvent evt) {
                     new Thread() { @Override public void run() {
                         for(SinhVien sv : arrSV){sv.setImage("");}
                         LDAO.Delete(lop.getIDLop());
+                        arrLop = LDAO.selectAllByGV(CurrentID);
                         onChange = true;
                         loader.dispose();
                         dispose();
@@ -426,11 +427,12 @@ public class formClass extends javax.swing.JDialog {
                             WMessage(ParentComponent, Lang.getString("DupIDSV"), Lang.getString("Notifi"), WARNING_MESSAGE);
                         }
                     }
+                    arrLop = LDAO.selectAllByGV(CurrentID);
+                    onChange = true;
+                    setSaveIcon();
                     loader.dispose();
                 }}.start();
             }});
-        onChange = true;
-        setSaveIcon();
         loader.setVisible(true);
     }//GEN-LAST:event_icoSaveMousePressed
 
@@ -465,12 +467,13 @@ public class formClass extends javax.swing.JDialog {
         if(WConfirm(this, Lang.getString("ReClass"), Lang.getString("Notifi"), OK_CANCEL_OPTION, WARNING_MESSAGE) == YES_NO_OPTION){
             try{
                 BigLoader loader = new BigLoader(ParentFrame, true);
-                loader.setInfor("/UI/Image/Server.gif", Lang.getString("ReSV"));
+                loader.setInfor("/UI/Image/Bin.gif", Lang.getString("ReSV"));
                 loader.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override public void windowOpened(java.awt.event.WindowEvent evt) {
                         new Thread() { @Override public void run() {
                             for(SinhVien sv : arrSV){sv.setImage("");}
                             LDAO.Delete(lop.getIDLop());
+                            arrLop = LDAO.selectAllByGV(CurrentID);
                             loader.dispose();
                             dispose();
                         }}.start();
@@ -534,12 +537,23 @@ public class formClass extends javax.swing.JDialog {
 
     public void setLop(Lop lop){
         this.lop = lop;
-        arrSV = SVDAO.selectAllByLop(lop.getIDLop());
-        txtClass.setText(lop.getName());
-        txtIDClass.setText(Long.toString(lop.getIDLop()));
-        setTotal();
-        fillListSV();
-        icoReturn.requestFocusInWindow();
+        BigLoader loader = new BigLoader(ParentFrame, true);
+        loader.setInfor("/UI/Image/Circle.gif", Lang.getString("Loading"));
+        loader.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                new Thread() { @Override public void run() {
+                    arrSV = SVDAO.selectAllByLop(lop.getIDLop());
+                    txtClass.setText(lop.getName());
+                    txtIDClass.setText(Long.toString(lop.getIDLop()));
+                    setTotal();
+                    fillListSV();
+                    icoReturn.requestFocusInWindow();
+                    arrLop = LDAO.selectAllByGV(CurrentID);
+                    loader.dispose();
+                }}.start();
+            }});
+        loader.setVisible(true);
+        
     }
     private void setTotal(){
         lblTotalSV.setText(Lang.getString("TotalSV").replaceFirst("X", String.valueOf(arrSV.size())));

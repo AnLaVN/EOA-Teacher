@@ -1,8 +1,10 @@
 package UI.Frame;
 // Make By Bình An || AnLaVN || KatoVN
 
+import static Controller.DatabaseData.BTDAO;
 import static Controller.DatabaseData.CHDAO;
 import static Controller.DatabaseData.DTDAO;
+import static Controller.DatabaseData.LDAO;
 import static Controller.LocalData.*;
 import com.AnLa.UI.Mode;
 import javax.swing.table.DefaultTableModel;
@@ -1085,10 +1087,23 @@ public class formTopic extends javax.swing.JDialog {
         if(!onChange){  WMessage(ParentComponent, Lang.getString("NotifiBackup").replaceAll("\\.", ".\n"), Lang.getString("Notifi"), WARNING_MESSAGE);    }
         else if(arrCH.isEmpty()){
             if(WConfirm(ParentComponent, Lang.getString("EmptySen").replaceFirst("\\.", ".\n"), Lang.getString("Notifi"), YES_NO_OPTION) == OK_OPTION){
-                deleteOld();
-                DTDAO.DeleteAllDeThi(dethi.getIDDeThi());
-                onChange = true;
-                dispose();}}
+                
+                BigLoader loader = new BigLoader(ParentFrame, true);
+                loader.setInfor("/UI/Image/Bin.gif", Lang.getString("Deleting"));
+                loader.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                        new Thread() { @Override public void run() {
+                            deleteOld();
+                            DTDAO.DeleteAllDeThi(dethi.getIDDeThi());
+                            onChange = true;
+                            arrDeThi = DTDAO.selectAllByGV(CurrentID);
+                            loader.dispose();
+                            dispose();
+                        }}.start();
+                    }});
+                loader.setVisible(true);
+                
+            }}
         else{dispose();}
     }//GEN-LAST:event_icoReturnMousePressed
 
@@ -1126,37 +1141,51 @@ public class formTopic extends javax.swing.JDialog {
         if(PercentT == 0.0 || !num.equals(Math.rint(num))) Perror = Lang.getString("InNum").replaceFirst("!", "!\n"+lblNum.getText()+"\n");
         if(!Perror.equals("")) {  WMessage(ParentComponent, Perror, Lang.getString("Notifi"), WARNING_MESSAGE);  return; }
 //update
-        dethi.setName(txtTopic.getText().trim());
-        dethi.setTotal(arrCH.size());
-        dethi.setPercentA(PercentA);
-        dethi.setPercentB(PercentB);
-        dethi.setPercentC(PercentC);
-        dethi.setPercentD(PercentD);
-        dethi.setPercentT(PercentT);
-        DTDAO.Update(dethi);
-        deleteOld();
-        for(int i = 0 ; i < arrCH.size() ; i++){
-            CauHoi ch = arrCH.get(i);
-            Index = i;
-            if(ch.getQuestion().length()>256){
-                txtSentence.requestFocusInWindow();
-                showDetail();
-                WMessage(ParentComponent, Lang.getString("LongQue"), Lang.getString("Notifi"), WARNING_MESSAGE);
-                return;
-            }
-            if(ch.getAnswerD().length() > 64){  txtD.requestFocusInWindow();   Perror = Lang.getString("LongAns").replaceFirst("X", "D");}
-            if(ch.getAnswerC().length() > 64){  txtC.requestFocusInWindow();   Perror = Lang.getString("LongAns").replaceFirst("X", "C");}
-            if(ch.getAnswerB().length() > 64){  txtB.requestFocusInWindow();   Perror = Lang.getString("LongAns").replaceFirst("X", "B");}
-            if(ch.getAnswerA().length() > 64){  txtA.requestFocusInWindow();   Perror = Lang.getString("LongAns").replaceFirst("X", "A");}
-            if(!Perror.equals("")){
-                showDetail();
-                WMessage(ParentComponent, Perror, Lang.getString("Notifi"), WARNING_MESSAGE);
-                return;
-            }
-            CHDAO.InsertCHDT(arrCH.get(i), dethi.getIDDeThi());
-        }
-        onChange = true;
-        setSaveIcon();
+        BigLoader loader = new BigLoader(ParentFrame, true);
+        loader.setInfor("/UI/Image/Circle.gif", Lang.getString("Uploading"));
+        loader.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                new Thread() { @Override public void run() {
+                    
+                    dethi.setName(txtTopic.getText().trim());
+                    dethi.setTotal(arrCH.size());
+                    dethi.setPercentA(PercentA);
+                    dethi.setPercentB(PercentB);
+                    dethi.setPercentC(PercentC);
+                    dethi.setPercentD(PercentD);
+                    dethi.setPercentT(PercentT);
+                    DTDAO.Update(dethi);
+                    deleteOld();
+                    for(int i = 0 ; i < arrCH.size() ; i++){
+                        CauHoi ch = arrCH.get(i);
+                        Index = i;
+                        if(ch.getQuestion().length()>256){
+                            txtSentence.requestFocusInWindow();
+                            showDetail();
+                            WMessage(ParentComponent, Lang.getString("LongQue"), Lang.getString("Notifi"), WARNING_MESSAGE);
+                            loader.dispose();
+                            return;
+                        }
+                        if(ch.getAnswerD().length() > 64){  txtD.requestFocusInWindow();   Perror = Lang.getString("LongAns").replaceFirst("X", "D");}
+                        if(ch.getAnswerC().length() > 64){  txtC.requestFocusInWindow();   Perror = Lang.getString("LongAns").replaceFirst("X", "C");}
+                        if(ch.getAnswerB().length() > 64){  txtB.requestFocusInWindow();   Perror = Lang.getString("LongAns").replaceFirst("X", "B");}
+                        if(ch.getAnswerA().length() > 64){  txtA.requestFocusInWindow();   Perror = Lang.getString("LongAns").replaceFirst("X", "A");}
+                        if(!Perror.equals("")){
+                            showDetail();
+                            WMessage(ParentComponent, Perror, Lang.getString("Notifi"), WARNING_MESSAGE);
+                            loader.dispose();
+                            return;
+                        }
+                        CHDAO.InsertCHDT(arrCH.get(i), dethi.getIDDeThi());
+                    }
+                    onChange = true;
+                    setSaveIcon();
+                    arrDeThi = DTDAO.selectAllByGV(CurrentID);
+                    
+                    loader.dispose();
+                }}.start();
+            }});
+        loader.setVisible(true);
     }//GEN-LAST:event_icoSaveMousePressed
 
     private void icoAddMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_icoAddMouseEntered
@@ -1275,11 +1304,23 @@ public class formTopic extends javax.swing.JDialog {
 
     private void icoDeleteMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_icoDeleteMousePressed
         if(WConfirm(this, Lang.getString("ReTopic"), Lang.getString("Notifi"), OK_CANCEL_OPTION, WARNING_MESSAGE) == YES_NO_OPTION){
-            try{
-                deleteOld();
-                DTDAO.DeleteAllDeThi(dethi.getIDDeThi());
-                dispose();
-            }catch(Exception e){ WMessage(this, Lang.getString("ErrTopic"), Lang.getString("Notifi"), INFORMATION_MESSAGE); }
+            BigLoader loader = new BigLoader(ParentFrame, true);
+            loader.setInfor("/UI/Image/Bin.gif", Lang.getString("Deleting"));
+            loader.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                    new Thread() { @Override public void run() {
+                        
+                        try{
+                            deleteOld();
+                            DTDAO.DeleteAllDeThi(dethi.getIDDeThi());
+                            dispose();
+                        }catch(Exception e){ WMessage(ParentFrame, Lang.getString("ErrTopic"), Lang.getString("Notifi"), INFORMATION_MESSAGE); }
+                        arrDeThi = DTDAO.selectAllByGV(CurrentID);
+                        
+                        loader.dispose();
+                    }}.start();
+                }});
+            loader.setVisible(true);
         }
     }//GEN-LAST:event_icoDeleteMousePressed
 
@@ -1428,24 +1469,37 @@ public class formTopic extends javax.swing.JDialog {
 
     public void setDeThi(DeThi dethi){
         this.dethi = dethi;
-        arrCH = CHDAO.selectAllByDeThi(dethi.getIDDeThi());
-        for(CauHoi ch : arrCH){ arrTemp.add(ch.getIDCauHoi());  }
-        Index = arrCH.isEmpty() ? -1 : 0;
-        showDetail();
-        fillListCH();
-        icoReturn.requestFocusInWindow();
-        for(int i = 0 ; i <= 100; i++){
-            String itemcbo = i + "%";
-            cboKnow.addItem(itemcbo);
-            cboUnde.addItem(itemcbo);
-            cboMani.addItem(itemcbo);
-            cboHigh.addItem(itemcbo);
-        }
-        cboKnow.setSelectedItem(dethi.getPercentA()+"%");
-        cboUnde.setSelectedItem(dethi.getPercentB()+"%");
-        cboMani.setSelectedItem(dethi.getPercentC()+"%");
-        cboHigh.setSelectedItem(dethi.getPercentD()+"%");
-        PercentT = dethi.getPercentT();
+        BigLoader loader = new BigLoader(ParentFrame, true);
+        loader.setInfor("/UI/Image/Circle.gif", Lang.getString("Loading"));
+        loader.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                new Thread() { @Override public void run() {
+                    
+                    arrCH = CHDAO.selectAllByDeThi(dethi.getIDDeThi());
+                    for(CauHoi ch : arrCH){ arrTemp.add(ch.getIDCauHoi());  }
+                    Index = arrCH.isEmpty() ? -1 : 0;
+                    showDetail();
+                    fillListCH();
+                    icoReturn.requestFocusInWindow();
+                    for(int i = 0 ; i <= 100; i++){
+                        String itemcbo = i + "%";
+                        cboKnow.addItem(itemcbo);
+                        cboUnde.addItem(itemcbo);
+                        cboMani.addItem(itemcbo);
+                        cboHigh.addItem(itemcbo);
+                    }
+                    cboKnow.setSelectedItem(dethi.getPercentA()+"%");
+                    cboUnde.setSelectedItem(dethi.getPercentB()+"%");
+                    cboMani.setSelectedItem(dethi.getPercentC()+"%");
+                    cboHigh.setSelectedItem(dethi.getPercentD()+"%");
+                    PercentT = dethi.getPercentT();
+                    
+                    loader.dispose();
+                }}.start();
+            }});
+        loader.setVisible(true);
+        
+        
     }
     private Double num = 0.0, percent = 0.0, numA = 0.0, numB = 0.0, numC = 0.0, numD = 0.0, markA = 0.0, markB = 0.0, markC = 0.0, markD = 0.0; 
     private void setNumberOfSen(){

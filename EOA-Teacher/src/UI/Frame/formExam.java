@@ -2,9 +2,14 @@ package UI.Frame;
 // Make By Bình An || AnLaVN || KatoVN
 
 import static Controller.DatabaseData.BTDAO;
+import static Controller.DatabaseData.DTDAO;
+import static Controller.DatabaseData.LDAO;
+import static Controller.LocalData.CurrentID;
 import static Controller.LocalData.Lang;
+import static Controller.LocalData.ParentFrame;
 import static Controller.LocalData.TTCOLOR;
 import static Controller.LocalData.U_TEXT;
+import static Controller.LocalData.arrBuoiThi;
 import static Controller.LocalData.arrDeThi;
 import static Controller.LocalData.arrLop;
 import static Controller.LocalData.onChange;
@@ -43,7 +48,7 @@ public class formExam extends javax.swing.JDialog {
         //set infor for combobox
         for(Lop lop : arrLop) cboClass.addItem(lop.getName());
         for(DeThi dethi : arrDeThi) cboTopic.addItem(dethi.getName());
-        cboTime.setModel(new javax.swing.DefaultComboBoxModel(new Object[]{0,1,15,45,60,90,120,180}));
+        cboTime.setModel(new javax.swing.DefaultComboBoxModel(new Object[]{0,15,45,60,90,120,180}));
         dateChooser.setTextRefernceLabel(lblChooseDay);
     }
     @SuppressWarnings("unchecked")
@@ -335,8 +340,18 @@ public class formExam extends javax.swing.JDialog {
 
     private void icoDeleteMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_icoDeleteMousePressed
         if(WConfirm(this, Lang.getString("ReExam"), Lang.getString("Notifi"), OK_CANCEL_OPTION, WARNING_MESSAGE) == YES_OPTION){
-            BTDAO.Delete(buoithi.getIDBuoiThi());
-            dispose();
+            BigLoader loader = new BigLoader(ParentFrame, true);
+            loader.setInfor("/UI/Image/Bin.gif", Lang.getString("Deleting"));
+            loader.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                    new Thread() { @Override public void run() {
+                        BTDAO.Delete(buoithi.getIDBuoiThi());
+                        arrBuoiThi = BTDAO.selectAllByGV(CurrentID);
+                        loader.dispose();
+                        dispose();
+                    }}.start();
+                }});
+            loader.setVisible(true);
         }
     }//GEN-LAST:event_icoDeleteMousePressed
 
@@ -365,8 +380,18 @@ public class formExam extends javax.swing.JDialog {
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         if(onChange && buoithi.getName() == null){
-            BTDAO.Delete(buoithi.getIDBuoiThi());
-            dispose();
+            BigLoader loader = new BigLoader(ParentFrame, true);
+            loader.setInfor("/UI/Image/Bin.gif", Lang.getString("Deleting"));
+            loader.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                    new Thread() { @Override public void run() {
+                        BTDAO.Delete(buoithi.getIDBuoiThi());
+                        arrBuoiThi = BTDAO.selectAllByGV(CurrentID);
+                        loader.dispose();
+                        dispose();
+                    }}.start();
+                }});
+            loader.setVisible(true);
         }else{ Update(); }
     }//GEN-LAST:event_formWindowClosing
 
@@ -462,27 +487,38 @@ public class formExam extends javax.swing.JDialog {
         icoSave.setPic(onChange ? "src/UI/Image/Save3.png" : "src/UI/Image/Save.png");
     }
     private void Update(){
-        if(cboClass.getSelectedIndex() <= -1 || cboTopic.getSelectedIndex() <= -1 || cboTime.getSelectedIndex() <= 0) {
-            WMessage(this, Lang.getString("EmExam"), Lang.getString("Notifi"), WARNING_MESSAGE);
-            return;
-        }
-        try {
-            BTDAO.DeleteBTL(buoithi);
-            String time = lblChooseStartTime.getText();
-            int hh = Integer.parseInt(time.substring(0, 2));
-            time = (time.contains("PM") ? String.valueOf(hh+12) : String.valueOf(hh)) + time.substring(2,5) + ":00";
-            buoithi.setName(txtExam.getText().trim());
-            buoithi.setIDLop(arrLop.get(cboClass.getSelectedIndex()).getIDLop());
-            buoithi.setIDDeThi(arrDeThi.get(cboTopic.getSelectedIndex()).getIDDeThi());
-            buoithi.setTime(Integer.parseInt(cboTime.getSelectedItem().toString()));
-            buoithi.setDelay(Integer.parseInt(cboDelay.getSelectedItem().toString()));
-            buoithi.setStart(DateFomater.parse(lblChooseDay.getText().replaceAll("-", "/")+" "+time));
-            BTDAO.Update(buoithi);
-            BTDAO.InsertBTL(buoithi);
-            onChange = true;
-            dispose();
-        } catch (ParseException ex) {
-            Mode.WMessage(this, Lang.getString("InDay"), Lang.getString("Notifi"), WARNING_MESSAGE);
-        }
+        BigLoader loader = new BigLoader(ParentFrame, true);
+        loader.setInfor("/UI/Image/Circle.gif", Lang.getString("Loading"));
+        loader.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override public void windowOpened(java.awt.event.WindowEvent evt) {
+                new Thread() { @Override public void run() {
+                    if(cboClass.getSelectedIndex() <= -1 || cboTopic.getSelectedIndex() <= -1 || cboTime.getSelectedIndex() <= 0) {
+                        WMessage(ParentFrame, Lang.getString("EmExam"), Lang.getString("Notifi"), WARNING_MESSAGE);
+                        loader.dispose();
+                        return;
+                    }
+                    try {
+                        BTDAO.DeleteBTL(buoithi);
+                        String time = lblChooseStartTime.getText();
+                        int hh = Integer.parseInt(time.substring(0, 2));
+                        time = (time.contains("PM") ? String.valueOf(hh+12) : String.valueOf(hh)) + time.substring(2,5) + ":00";
+                        buoithi.setName(txtExam.getText().trim());
+                        buoithi.setIDLop(arrLop.get(cboClass.getSelectedIndex()).getIDLop());
+                        buoithi.setIDDeThi(arrDeThi.get(cboTopic.getSelectedIndex()).getIDDeThi());
+                        buoithi.setTime(Integer.parseInt(cboTime.getSelectedItem().toString()));
+                        buoithi.setDelay(Integer.parseInt(cboDelay.getSelectedItem().toString()));
+                        buoithi.setStart(DateFomater.parse(lblChooseDay.getText().replaceAll("-", "/")+" "+time));
+                        BTDAO.Update(buoithi);
+                        BTDAO.InsertBTL(buoithi);
+                        onChange = true;
+                    } catch (ParseException ex) {
+                        Mode.WMessage(ParentFrame, Lang.getString("InDay"), Lang.getString("Notifi"), WARNING_MESSAGE);
+                    }
+                    arrBuoiThi = BTDAO.selectAllByGV(CurrentID);
+                    loader.dispose();
+                    dispose();
+                }}.start();
+            }});
+        loader.setVisible(true);
     }
 }
